@@ -1,0 +1,189 @@
+#!/bin/bash
+# deblow - R1
+# usage: deblow {app list}
+#
+# Run {list} of apps to rm bloatware based on text list using adb
+# Copyright 2014 qngreentea
+#
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details."
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA"
+#
+
+# ----- No List? -----
+if [ -z ${1+x} ]; then echo "usage: deblow {app list}" && exit; fi
+
+# ------ Colour? ------
+red="\033[0;31m"
+litePurple="\033[0;35m"
+purple="\033[1;35m"
+nc="\033[0m"
+
+# ----- Logo -----
+clear
+echo -e "${purple}"
+echo "********************************************************************************"
+echo ""
+echo ""
+#echo -e "              deblow${nc}"                                 
+echo -e    "${red}                      (             )  (               "
+echo -e          "                      )\ )   (   ( /(  )\      (  (    "
+echo -e          "                     (()/(  ))\  )\())((_) (   )\))(   "
+echo -e          "                      ((_))/((_)((_)\  _   )\ ((_)()\  "
+echo -e "${purple}                      _| |${red}(_))${purple}  | |${red}(_)${purple}| | ${red}((_)_(()((_) ${purple}"
+echo             "                    / _\` |/ -_) | '_ \\| |/ _ \\\\ V  V / "
+echo -e          "                    \__,_|\___| |_.__/|_|\___/ \_/\_/ ${nc} "
+echo ""
+echo -e "${litePurple}                           List based bloat app remover"
+echo "                              for use with CWM/adb services"
+echo ""
+echo -e "                            Copyright 2014 ${purple} queenTea${litePurple}"
+echo "                                   Revision 1"
+echo -e "${purple}"
+echo "********************************************************************************"
+echo -e "${nc}"
+sleep 3
+# ----- Copyright -----
+echo "   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version."
+echo ""
+echo "   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details."
+echo ""
+echo "   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software Foundation,
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA"
+echo ""
+read -p "Press [Enter] key to continue..."
+clear
+# ----- Reboot ADB? -----
+read -p "Would you like to restart the adb server? (y/n): " -n 1 -r
+echo ""
+echo ""
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+   echo "Rebooting adb server.."
+   adb kill-server
+   adb start-server
+else 
+   echo "Not rebooting adb server.."
+fi
+echo ""
+echo ""
+# ----- Boot to recovery -----
+read -p "Does your device need to be rebooted to recovery? (y/n): " -n 1 -r
+echo ""
+echo ""
+
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+   echo "Rebooting device"
+   adb reboot recovery
+   read -p "Press [Enter] key once device is booted into Clockwork..."
+else 
+   echo "Not rebooting device.."
+fi
+echo ""
+echo ""
+# ----- Mount? -----
+read -p "Does your device need to have '/system' mounted? (y/n): " -n 1 -r
+echo ""
+echo ""
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+   echo "Mounting.."
+   adb shell mount /system
+else 
+   echo "Not mounting.."
+fi
+echo ""
+echo ""
+# ----- Continue Confirmation -----
+echo -e "   ${red}THIS IS THE LAST CHANCE TO EXIT WITHOUT RUNNING YOUR LIST!${nc}"
+echo "If you would like to cancel, use 'CRTL+c' or answer 'n'"
+echo ""
+echo "Starting deletion based on list: $1"
+read -p "Confirm you trust the list '$1' (y/n): " -n 1 -r
+echo ""
+echo ""
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+echo "Starting deletion using list: $1"
+   for WORD in `cat $1`
+   do 
+       echo "Removing $WORD"
+       
+      adb shell rm /system/app/$WORD 
+
+   done
+   echo "Deletions list has been run. Errors would have been displayed."
+
+else
+echo "Aborted, exiting now with no removals"
+fi
+echo ""
+read -p "Would you like to reboot your device now? (y/n): " -n 1 -r
+echo ""
+echo ""
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+   echo Rebooting
+   adb reboot
+else
+   echo "Not rebooting"
+fi
+read -p "Press any key to exit..." -n 1 
+	
+echo -e "${purple}"
+echo "              MMMMMMMMM                         MMMMMMMMM"
+echo "          MMMMMMMMMMMMMMMMMM               MMMMMMMMMMMMMMMMMM"
+echo "       MMMMMMMXXXXXXXXXXMMMMMMM         MMMMMMMXXXXXXXXXXMMMMMMM"
+echo "    MMMMMMXXXXXXXXXXXXXXXXXMMMMMM     MMMMMMXXXXXXXXXXXXXXXXXMMMMMM"
+echo "   MMMMMXXXXXXXXOOOOOOOOXXXXXXMMMM   MMMMXXXXXXOOOOOOOOXXXXXXXXMMMMM"
+echo "  MMMMXXXXXXXOOOOOOOOOOOOOOOXXXXMMM MMMXXXXOOOOOOOOOOOOOOOXXXXXXXMMMM"
+echo " MMMMXXXXXXOOOOOOOOOOOOOOOOOOOOXXXMMMXXXOOOOOOOOOOOOOOOOOOOOXXXXXXMMMM"
+echo " MMMXXXXXOOOOOOOOOOOOOOOOOOOOOOOOXXXXXOOOOOOOOOOOOOOOOOOOOOOOOXXXXXMMM"
+echo "MMMXXXXXOOOOOOOOOOO       OOOOOOOOOXOOOOOOOOO       OOOOOOOOOOOOXXXXMMM"
+echo "MMMXXXXOOOOOOOOO              OOOOOOOOOOO              OOOOOOOOOOXXXMMM"
+echo "MMMXXXXOOOOOOOO                  OOOOO                  OOOOOOOOOXXXMMM"
+echo "MMMXXXXOOOOOOO                     O                     OOOOOOOOXXXMMM"
+echo "MMMXXXXOOOOOOO                                           OOOOOOOOXXXMMM"
+echo "MMMXXXXOOOOOOO      S P R E A D          P E A C E       OOOOOOOOXXXMMM"
+echo "MMMXXXXXOOOOOO                                           OOOOOOOXXXXMMM"
+echo " MMMXXXXOOOOOOO                                         OOOOOOOOXXXMMM"
+echo " MMMMXXXXOOOOOOO                 A N D                 OOOOOOOOXXXMMMM"
+echo "  MMMXXXXOOOOOOOOO                                    OOOOOOOOOXXXMMM"
+echo "  MMMMXXXXOOOOOOOOOO                                OOOOOOOOOOXXXMMMM"
+echo "   MMMXXXXXOOOOOOOOOOO          L O V E          OOOOOOOOOOOOXXXXMMM"
+echo "    MMMXXXXXOOOOOOOOOOOOO                     OOOOOOOOOOOOOOXXXXMMM"
+echo "     MMMXXXXXOOOOOOOOOOOOOOO               OOOOOOOOOOOOOOOOXXXXMMM"
+echo "      MMMXXXXXOOOOOOOOOOOOOOOOO         OOOOOOOOOOOOOOOOOXXXXXMMM"
+echo "       MMMXXXXXXOOOOOOOOOOOOOOOOOO   OOOOOOOOOOOOOOOOOOXXXXXXMMM"
+echo "         MMMXXXXXXXOOOOOOOOOOOOOOOO OOOOOOOOOOOOOOOOXXXXXXXMMM"
+echo "           MMMXXXXXXXXOOOOOOOOOOOOOOOOOOOOOOOOOOOXXXXXXXXMMM"
+echo "             MMMMXXXXXXXXXOOOOOOOOOOOOOOOOOOOXXXXXXXXXMMMM"
+echo "                MMMMXXXXXXXXXXXOOOOOOOOOXXXXXXXXXXMMMMM"
+echo "                   MMMMMXXXXXXXXXXXOXXXXXXXXXXXMMMMM"
+echo "                      MMMMMMXXXXXXXXXXXXXXXMMMMMM"
+echo "                          MMMMMMXXXXXXXMMMMMM"
+echo "                              MMMMMXMMMMM"
+echo "                                 MMMMM"
+echo "                                  MMM"
+echo "                                   M"
+echo -e "${nc}Exiting"
+sleep 5
+exit
